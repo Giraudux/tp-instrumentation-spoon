@@ -55,7 +55,7 @@ public class LogWriter {
 
         Integer count = calls.get(method);
         if (count == null) {
-            count = 0;
+            count = 1;
         } else {
             count++;
         }
