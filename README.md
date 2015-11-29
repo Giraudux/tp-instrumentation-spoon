@@ -11,5 +11,5 @@ $ cp -r src/main/java/fr/univ/nantes/logger src/main/resources/example-instrumen
 $ cd src/main/resources/example-instrumented
 $ mvn package
 $ java -cp .:target/example-1.0-SNAPSHOT.jar example.A 2
-$ cat src/main/resources/example-instrumented/log
+$ cat log
 ```
