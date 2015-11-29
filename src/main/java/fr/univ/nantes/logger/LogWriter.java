@@ -11,14 +11,15 @@ import java.util.Map;
  */
 public class LogWriter {
     private static Map<String, Integer> calls;
+    private static ShutdownHookLog shutdownHook;
     private static PrintWriter fileWriter;
 
     public static void writeLog() {
         try {
-            PrintWriter writer = getWriter();
-            if (calls != null && !calls.isEmpty()) {
+            initWriter();
+            if (calls != null) {
                 for (Map.Entry<String, Integer> entry : calls.entrySet()) {
-                    writer.write(entry.getKey() + ": " + entry.getValue() + "\n");
+                    fileWriter.write(entry.getKey() + ": " + entry.getValue() + "\n");
                 }
             }
         } catch (FileNotFoundException e) {
@@ -32,20 +33,22 @@ public class LogWriter {
 
     public static void out(String string, boolean error) {
         try {
-            PrintWriter writer = getWriter();
+            initWriter();
 
             if (error) {
-                writer.write("ERROR: ");
+                fileWriter.write("ERROR: ");
             } else {
-                writer.write("INFO: ");
+                fileWriter.write("INFO: ");
             }
-            writer.write(string + "\n");
+            fileWriter.write(string + "\n");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     public static void call(String method) {
+        initHook();
+
         if (calls == null) {
             calls = new HashMap<String, Integer>();
         }
@@ -59,12 +62,16 @@ public class LogWriter {
         calls.put(method, count);
     }
 
-    protected static PrintWriter getWriter() throws FileNotFoundException {
-        if (fileWriter == null) {
-            ShutdownHookLog shutdownHook = new ShutdownHookLog();
+    protected static void initHook() {
+        if (shutdownHook == null) {
+            shutdownHook = new ShutdownHookLog();
             Runtime.getRuntime().addShutdownHook(shutdownHook);
+        }
+    }
+
+    protected static void initWriter() throws FileNotFoundException {
+        if (fileWriter == null) {
             fileWriter = new PrintWriter("log");
         }
-        return fileWriter;
     }
 }
