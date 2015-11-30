@@ -10,6 +10,7 @@ import java.util.Map;
  * @author Thomas Minier
  */
 public class LogWriter {
+    private static Integer level;
     private static Map<String, Integer> calls;
     private static ShutdownHookLog shutdownHook;
     private static PrintWriter fileWriter;
@@ -32,6 +33,8 @@ public class LogWriter {
     }
 
     public static void out(String string, boolean error) {
+        initHook();
+
         try {
             initWriter();
 
@@ -60,6 +63,37 @@ public class LogWriter {
             count++;
         }
         calls.put(method, count);
+    }
+
+    public static void enterMethod(String method) {
+        initHook();
+
+        if (level == null) {
+            level = new Integer(0);
+        } else {
+            level++;
+        }
+
+        try {
+            initWriter();
+
+            for (int i = 0; i < level; i++) {
+                fileWriter.write(" | ");
+            }
+            fileWriter.write(method);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void leaveMethod() {
+        initHook();
+
+        if (level == null) {
+            level = new Integer(0);
+        } else {
+            level--;
+        }
     }
 
     protected static void initHook() {
