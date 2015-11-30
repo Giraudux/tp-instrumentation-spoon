@@ -80,7 +80,7 @@ public class LogWriter {
             for (int i = 0; i < level; i++) {
                 fileWriter.write(" | ");
             }
-            fileWriter.write(method);
+            fileWriter.write(method + "\n");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
