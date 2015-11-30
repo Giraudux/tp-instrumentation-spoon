@@ -11,7 +11,7 @@ import spoon.reflect.declaration.CtMethod;
 public class MethodCallCounterProcessor extends AbstractProcessor<CtMethod> {
     @Override
     public void process(CtMethod method) {
-        System.out.println(method.getParent().getSignature() + ": " + method.getSignature());
+        System.out.println(method.getParent().getSignature() + ": " + method.getSignature() + ";");
         String code = "fr.univ.nantes.logger.LogWriter.call(\"" + method.getParent().getSignature() + ": " + method.getSignature() + "\")";
         CtCodeSnippetStatement snippet = getFactory().Code().createCodeSnippetStatement(code);
         method.getBody().insertBegin(snippet);
