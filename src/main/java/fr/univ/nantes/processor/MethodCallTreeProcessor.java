@@ -1,21 +1,27 @@
 package fr.univ.nantes.processor;
 
+import fr.univ.nantes.Spoon;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTry;
-import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtParameter;
 
 /**
  * @author Alexis Giraudet
  * @author Thomas Minier
  */
-public class MethodCallTreeProcessor extends AbstractProcessor<CtMethod> {
+public class MethodCallTreeProcessor extends AbstractProcessor<CtExecutable<?>> {
     @Override
-    public void process(CtMethod method) {
-        String enterCode = "fr.univ.nantes.logger.LogWriter.enterMethod(\"" + getMethodKey(method) + "\")";
+    public boolean isToBeProcessed(CtExecutable<?> executable) {
+        return executable instanceof CtMethod || executable instanceof CtConstructor;
+    }
+
+    @Override
+    public void process(CtExecutable<?> executable) {
+        String enterCode = "fr.univ.nantes.logger.LogWriter.enterMethod(\"" + Spoon.getExecutableKey(executable) + "\")";
         String leaveCode = "fr.univ.nantes.logger.LogWriter.leaveMethod()";
         CtStatement enterCtStatement = getFactory().Code().createCodeSnippetStatement(enterCode);
         CtStatement leaveCtStatement = getFactory().Code().createCodeSnippetStatement(leaveCode);
@@ -25,26 +31,9 @@ public class MethodCallTreeProcessor extends AbstractProcessor<CtMethod> {
 
         finallyCtBlock.addStatement(leaveCtStatement);
         ctTry.setFinalizer(finallyCtBlock);
-        ctTry.setBody(method.getBody());
+        ctTry.setBody(executable.getBody());
         bodyCtBlock.addStatement(enterCtStatement);
         bodyCtBlock.addStatement(ctTry);
-        method.setBody(bodyCtBlock);
-    }
-
-    private String getMethodKey(CtMethod<?> method) {
-        StringBuilder methodKey = new StringBuilder();
-        methodKey.append(method.getParent(CtClass.class).getSimpleName())
-                .append(".").append(method.getSimpleName())
-                .append("(");
-        for (CtParameter<?> parameter : method.getParameters()) {
-            methodKey.append(parameter.toString())
-                    .append(", ");
-        }
-        if (methodKey.charAt(methodKey.length() - 1) != '(') {
-            methodKey.delete(methodKey.length() - 2, methodKey.length());
-        }
-        methodKey.append(")");
-
-        return methodKey.toString();
+        executable.setBody(bodyCtBlock);
     }
 }
